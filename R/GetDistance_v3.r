@@ -27,7 +27,7 @@ CommuinityDistance <- function(network,
 							 random = 1000,
                              ratio = 0.1,
                              nCore=1,
-                             method = c('closest', 'shortest', 'kernel', 'centre', 'separation')) {
+                             method = c('closest', 'shortest', 'kernel', 'centre', 's2b', 'separation')) {
     # cat(method,'\n')
     overlap_filtering=TRUE
     if (is.character(method)){
@@ -38,6 +38,7 @@ CommuinityDistance <- function(network,
             shortest = get.shortest.dist,
             kernel = get.kernel.dist,
             centre = get.centre.dist,
+            s2b = get.s2b.dist,
             separation = get.separation.dist)
     } else if(is.function(method)){
         dist.function = method
@@ -60,6 +61,7 @@ CommuinityDistance <- function(network,
 	g.res  <- preprocessedNetwork(network)
     comm.genelist <- CommunityGenelist(module.genelist, g.res, overlap_filtering = overlap_filtering)
 	distm <- igraph::distances(g.res, igraph::V(g.res), igraph::V(g.res))
+	avg.dist <- igraph::mean_distance(g.res)
 
     cat('Dist matrix :', dim(distm)[1],'X',dim(distm)[2], 'is made','\n')
     cat('Random distance measuring is going to be processed by', random, 'times','\n')
@@ -166,17 +168,17 @@ CommuinityDistance <- function(network,
                     rs1 = read.csv(paste0(dirn,'/',names(comm.genelist)[m],'/rand',j,'.csv'))[,1]
                     rs2 = read.csv(paste0(dirn,'/',names(comm.genelist)[n],'/rand',j,'.csv'))[,1]
                     
-                    comm.distance = dist.function(distm, rs1,rs2) 
+                    comm.distance = dist.function(distm, rs1,rs2,avg.dist=avg.dist) 
                     return(comm.distance)
                 }) %>% unlist
 
-                xval = dist.function(distm, cl1g, cl2g) 
+                xval = dist.function(distm, cl1g, cl2g,avg.dist=avg.dist) 
                 zval = (xval-mean(comm.distance.list))/sd(comm.distance.list)
                 pval = sum(comm.distance.list<xval)/random
 
                 df1 = data.frame(Module1=names(comm.genelist)[m], Module2=names(comm.genelist)[n], z_score=zval, distance_score=xval, pvalue=pval)
-                pv = sapply(df1$pvalue, function(vv) ifelse(vv>0.5, 1-vv,vv))
-                df1$p.adj = p.adjust(pv,'BH')
+                # pv = sapply(df1$pvalue, function(vv) ifelse(vv>0.5, 1-vv,vv))
+                df1$p.adj = p.adjust(df1$pvalue,'BH')
                 return(df1)
             })
             dist.rel = do.call(rbind, dist.rel)

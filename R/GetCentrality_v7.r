@@ -99,7 +99,7 @@
 
 
 # cal.MoBCgenes <- function(g, comm.genelist, community1n, community2n,random,ratio,randomMethod, nCore){
-
+# # >
 #     # cat('cal.MoBCgenes')
 
 #     community1 = comm.genelist[[community1n]]
@@ -122,7 +122,7 @@
 #         random.mat = cal.MoBC.random(g, comm.genelist, community1n, community2n,random,ratio,randomMethod,show.binning=FALSE, nCore=nCore)
 #         pval = sapply(score.df$gene, function(gn){
 #             xval = score.df[match(gn, score.df$gene),'score']
-#             pval = sum(random.mat[gn,]>xval)/random
+#             pval = sum(random.mat[gn,]>=xval)/(random+1)
 #         })
 #         nscore = sapply(score.df$gene, function(gn){
 #             xval = score.df[match(gn, score.df$gene),'score']
@@ -177,7 +177,11 @@
 #             # intg = edges$res[ixix] %>% lapply(function(xx) setdiff(names(xx), names(xx)[c(1,length(xx))]))
 #             etab = edges$res[ixix] %>% lapply(function(xx) if (length(xx) > 2) names(xx[2:(length(xx)-1)]) else character(0))
 #             etab1 = etab %>% unlist %>% table
-#             val = etab1/length(etab)
+#             val = etab1 / length(etab)
+#             if (length(etab1) == 0) {
+#                 val = setNames(rep(0, length(allg)), allg)
+#                 # val[names(etab1)] = as.numeric(etab1) / length(etab)
+#             }
 #     		return(val[allg])
 #         })%>% 'rownames<-'(allg)
 #         vv[is.na(vv)] = 0
@@ -207,7 +211,11 @@
 #             # intg = edges$res[ixix] %>% lapply(function(xx) setdiff(names(xx), names(xx)[c(1,length(xx))]))
 #             etab = edges$res[ixix] %>% lapply(function(xx) if (length(xx) > 2) names(xx[2:(length(xx)-1)]) else character(0))
 #             etab1 = etab %>% unlist %>% table
-#             val = etab1/length(etab)
+#             val = etab1 / length(etab)
+#             if (length(etab1) == 0) {
+#                 val = setNames(rep(0, length(allg)), allg)
+#                 # val[names(etab1)] = as.numeric(etab1) / length(etab)
+#             }
 #     		return(val[allg])
 #         })%>% 'rownames<-'(allg)
 #         vv[is.na(vv)] = 0
@@ -394,10 +402,18 @@
 
 #         comm.distance.list = parallel::mclapply(1:random,mc.cores=nCore, function(j){
 #         # comm.distance.list = lapply(1:random,function(j){
+#             cat('random ',j,'\n')
+#             fnn=paste0(dirn,'/',community1n,'_',community2n,'/MoBC_rand',j,'_ix.RDS')
+#             if(!file.exists(paste0(dirn,'/',community1n,'_',community2n))) dir.create(paste0(dirn,'/',community1n,'_',community2n))
+#             if(file.exists(fnn)){
+#                 comm.distance = readRDS(file=fnn)
+#                 return(comm.distance)
+#             }
 #             rs1 = read.csv(paste0(dirn,'/',community1n,'/rand',j,'.csv'))[,1]
 #             rs2 = read.csv(paste0(dirn,'/',community2n,'/rand',j,'.csv'))[,1]
             
 #             comm.distance = cal.MoBCgenes.values(g, rs1,rs2, allg) 
+#             saveRDS(comm.distance,file=fnn)
 #             return(comm.distance)
 #         })
 #         comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
@@ -563,12 +579,18 @@
 #         if(method=='FCS'){
 #             cat('You choosed FCS method.\n')
 #             comm.distance.list = parallel::mclapply(1:random,mc.cores=nCore, function(j){
-#                 # cat(j,'-th random sampling is done.\n')
-#             # comm.distance.list = lapply(1:random,function(j){
+#                 cat(j,'-th random sampling is done.\n')
+#                 fnn=paste0(dirn,'/',community1n,'_',community2n,'/FCS_rand',j,'_ix.RDS')
+#                 if(file.exists(fnn)){
+#                     comm.distance = readRDS(file=fnn)
+#                     return(comm.distance)
+#                 }
+#                 # comm.distance.list = lapply(1:random,function(j){
 #                 rs1 = read.csv(paste0(dirn,'/',community1n,'/rand',j,'.csv'))[,1]
 #                 rs2 = read.csv(paste0(dirn,'/',community2n,'/rand',j,'.csv'))[,1]
                 
 #                 comm.distance = cal.FCSgenes.values(g, rs1,rs2, allg) 
+#                 saveRDS(comm.distance,file=fnn)
 #                 return(comm.distance)
 #             })
 #             comm.distance.list = do.call(cbind, comm.distance.list) %>% 'rownames<-'(allg)
@@ -580,9 +602,9 @@
 #             S <- igraph::distances(g, algorithm = "unweighted")
 #             avgd <- igraph::mean_distance(g)
 #             Smt = S<avgd
-#             dir.create(paste0(dirn,'/',community1n,'_',community2n))
+#             if(!file.exists(paste0(dirn,'/',community1n,'_',community2n))) dir.create(paste0(dirn,'/',community1n,'_',community2n))
 #             for(j in 1:random){
-#                 fnn=paste0(dirn,'/',community1n,'_',community2n,'/rand',j,'_ix.RDS')
+#                 fnn=paste0(dirn,'/',community1n,'_',community2n,'/S2B_rand',j,'_ix.RDS')
 #                 if(file.exists(fnn)) next
 #                 cat(j,'-th random path is saved....\n')
 #                 rs1 = read.csv(paste0(dirn,'/',community1n,'/rand',j,'.csv'))[,1] #%>% as.character
@@ -596,9 +618,9 @@
 #             comm.distance.list = parallel::mclapply(1:random,mc.cores=nCore, function(j){
 #             # comm.distance.list = lapply(1:random,function(j){
 #                 cat(j,'-th random sampling is done.\n')
+#                 use_ids = readRDS(file=paste0(dirn,'/',community1n,'_',community2n,'/S2B_rand',j,'_ix.RDS'))
 #                 rs1 = read.csv(paste0(dirn,'/',community1n,'/rand',j,'.csv'))[,1] #%>% as.character
 #                 rs2 = read.csv(paste0(dirn,'/',community2n,'/rand',j,'.csv'))[,1] #%>% as.character
-#                 use_ids = readRDS(file=paste0(dirn,'/',community1n,'_',community2n,'/rand',j,'_ix.RDS'))
 #                 comm.distance = cal.S2Bgenes.values(g, rs1,rs2, allg,use_ids=use_ids)  #!!!!!!!!!!!!!
 #                 return(comm.distance)
 #             })
@@ -703,7 +725,7 @@
 #         random.mat = cal.random(g, comm.genelist, community1n, community2n,random,ratio,randomMethod,show.binning=FALSE, nCore=nCore,method='FCS')
 #         pval = sapply(score.df$gene, function(gn){
 #             xval = score.df[match(gn, score.df$gene),'score']
-#             pval = sum(random.mat[gn,]>xval)/random
+#             pval = sum(random.mat[gn,]>=xval)/(random+1)
 #         })
 #         nscore = sapply(score.df$gene, function(gn){
 #             xval = score.df[match(gn, score.df$gene),'score']
@@ -890,7 +912,7 @@
 #         random.mat = cal.random(g, comm.genelist, community1n, community2n,random,ratio,randomMethod,show.binning=FALSE, nCore=nCore,method='S2B')
 #         pval = sapply(score.df$gene, function(gn){
 #             xval = score.df[match(gn, score.df$gene),'score']
-#             pval = sum(random.mat[gn,]>xval)/random
+#             pval = sum(random.mat[gn,]>=xval)/(random+1)
 #         })
 #         nscore = sapply(score.df$gene, function(gn){
 #             xval = score.df[match(gn, score.df$gene),'score']
