@@ -2,7 +2,7 @@
 % Please edit documentation in R/GetCentrality_v8.r
 \name{MoBC.genes}
 \alias{MoBC.genes}
-\title{Get.Centrality}
+\title{MoBC.genes}
 \usage{
 MoBC.genes(
   network,
@@ -29,5 +29,5 @@ data.frame
 Calculate centrality between two modules from MoBC result
 }
 \examples{
-Get.Centrality(MoBC.result, 'module_1','module_2')
+MoBC.genes(network, module.gene.list, module1, module2)
 }

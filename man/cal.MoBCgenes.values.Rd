@@ -20,5 +20,5 @@ vector
 Calculate centrality between two modules from MoBC result
 }
 \examples{
-cal.MoBCgenes.values(graph, 'module_1','module_2', allg)
+cal.MoBCgenes.values(graph, community1,community2, allg)
 }
