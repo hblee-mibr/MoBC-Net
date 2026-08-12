@@ -5,7 +5,7 @@
 \title{get.closest.dist
 average of sum of min of every community node based shortest path length}
 \usage{
-get.closest.dist(distm, xx1, yy1)
+get.closest.dist(distm, xx1, yy1, avg.dist = NULL)
 }
 \description{
 get.closest.dist

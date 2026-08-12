@@ -4,7 +4,7 @@
 \alias{get.shortest.dist}
 \title{Distance Function}
 \usage{
-get.shortest.dist(distm, x, y)
+get.shortest.dist(distm, x, y, avg.dist = NULL)
 }
 \arguments{
 \item{distm}{input}

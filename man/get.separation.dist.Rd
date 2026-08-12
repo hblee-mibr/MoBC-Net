@@ -5,7 +5,7 @@
 \title{get.separation.dist
 difference between shortest distance of communities and the average shortest distance of each community}
 \usage{
-get.separation.dist(distm, x, y)
+get.separation.dist(distm, x, y, avg.dist = NULL)
 }
 \description{
 get.separation.dist

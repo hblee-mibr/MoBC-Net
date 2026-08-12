@@ -5,7 +5,7 @@
 \title{get.kernel.dist
 average of kernelized distance between communities}
 \usage{
-get.kernel.dist(distm, x, y)
+get.kernel.dist(distm, x, y, avg.dist = NULL)
 }
 \description{
 get.kernel.dist

@@ -11,7 +11,7 @@ CommuinityDistance(
   random = 1000,
   ratio = 0.1,
   nCore = 1,
-  method = c("closest", "shortest", "kernel", "centre", "separation")
+  method = c("closest", "shortest", "kernel", "centre", "s2b", "separation")
 )
 }
 \arguments{
